@@ -1,27 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>DevOps Portfolio - 3-Tier App</title>
-    <style>body { font-family: Arial; padding: 50px; background: #f4f4f9; }</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Architecture Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
 </head>
-<body>
-    <h1>Production-Grade 3-Tier Architecture</h1>
-    <p>Frontend (Nginx) &rarr; Reverse Proxy &rarr; Backend (Python) &rarr; Database (PostgreSQL)</p>
-    <button onclick="fetchUsers()" style="padding: 10px; cursor: pointer;">Fetch Data from Secure Database</button>
-    <ul id="user-list" style="margin-top: 20px; font-weight: bold;"></ul>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-4xl w-full glass-panel rounded-2xl p-8 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-4 mb-6">
+            <h1 class="text-3xl font-bold text-cyan-400">System Architecture Dashboard</h1>
+            <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-sm font-semibold border border-emerald-500/30">
+                ● Infrastructure Online
+            </span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center text-sm">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+                <div class="text-slate-400 mb-1">Tier 1: Web Proxy</div>
+                <div class="font-mono text-cyan-300 font-bold">Nginx Alpine</div>
+                <div class="text-xs text-slate-500 mt-2">Port: 80 (Public)</div>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+                <div class="text-slate-400 mb-1">Tier 2: Backend API</div>
+                <div class="font-mono text-purple-300 font-bold">Python Flask</div>
+                <div class="text-xs text-slate-500 mt-2">Network: Internal Bridge</div>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
+                <div class="text-slate-400 mb-1">Tier 3: Database</div>
+                <div class="font-mono text-blue-300 font-bold">PostgreSQL 15</div>
+                <div class="text-xs text-slate-500 mt-2">Storage: Persistent Volume</div>
+            </div>
+        </div>
+
+        <div class="text-center mb-8">
+            <button onclick="fetchUsers()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+                Execute Database Query
+            </button>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl p-4 border border-slate-700 min-h-[150px]">
+            <div class="flex justify-between text-xs text-slate-500 font-mono mb-3 border-b border-slate-800 pb-2">
+                <span>> root@mysql1:~# api_response</span>
+                <span>Response Time: <span id="ping" class="text-emerald-400">-- ms</span></span>
+            </div>
+            <ul id="user-list" class="space-y-2 font-mono text-emerald-400"></ul>
+        </div>
+    </div>
+
     <script>
         function fetchUsers() {
-            fetch('/api/users')
-                .then(response => response.json())
-                .then(data => {
-                    const list = document.getElementById('user-list');
-                    list.innerHTML = '';
-                    data.forEach(user => {
-                        const li = document.createElement('li');
-                        li.textContent = user.name + ' - ' + user.role;
-                        list.appendChild(li);
+            const list = document.getElementById('user-list');
+            const ping = document.getElementById('ping');
+            list.innerHTML = '<li class="text-slate-500 animate-pulse">Establishing secure connection via Reverse Proxy...</li>';
+            
+            const start = Date.now();
+            
+            setTimeout(() => {
+                fetch('/api/users')
+                    .then(response => response.json())
+                    .then(data => {
+                        const timeTaken = Date.now() - start;
+                        ping.textContent = timeTaken + ' ms';
+                        list.innerHTML = '';
+                        data.forEach(user => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<span class="text-slate-600">[UID-${user.id}]</span> <span class="text-white">${user.name}</span> <span class="text-slate-500">::</span> <span class="text-cyan-400">${user.role}</span>`;
+                            list.appendChild(li);
+                        });
                     });
-                });
+            }, 400); // Slight artificial delay to make the terminal effect look cool
         }
     </script>
 </body>

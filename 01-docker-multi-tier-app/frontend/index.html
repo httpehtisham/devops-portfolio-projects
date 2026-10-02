@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevOps Portfolio - 3-Tier App</title>
+    <style>body { font-family: Arial; padding: 50px; background: #f4f4f9; }</style>
+</head>
+<body>
+    <h1>Production-Grade 3-Tier Architecture</h1>
+    <p>Frontend (Nginx) &rarr; Reverse Proxy &rarr; Backend (Python) &rarr; Database (PostgreSQL)</p>
+    <button onclick="fetchUsers()" style="padding: 10px; cursor: pointer;">Fetch Data from Secure Database</button>
+    <ul id="user-list" style="margin-top: 20px; font-weight: bold;"></ul>
+    <script>
+        function fetchUsers() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('user-list');
+                    list.innerHTML = '';
+                    data.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = user.name + ' - ' + user.role;
+                        list.appendChild(li);
+                    });
+                });
+        }
+    </script>
+</body>
+</html>

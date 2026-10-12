@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HUB_USER = 'httpehtisham'
+        BACKEND_IMAGE   = "${DOCKER_HUB_USER}/devops-backend-api"
+        FRONTEND_IMAGE  = "${DOCKER_HUB_USER}/devops-frontend-web"
+        BUILD_TAG       = "${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('1. Checkout Source Code') {
+            steps {
+                echo 'Pulling latest Task 1 application code from GitHub...'
+                checkout scm
+            }
+        }
+
+        stage('2. Build Container Images') {
+            steps {
+                echo 'Building Docker image for Backend API...'
+                sh "docker build -t ${BACKEND_IMAGE}:${BUILD_TAG} -t ${BACKEND_IMAGE}:latest ./01-docker-multi-tier-app/backend"
+                
+                echo 'Building Docker image for Frontend Web Proxy...'
+                sh "docker build -t ${FRONTEND_IMAGE}:${BUILD_TAG} -t ${FRONTEND_IMAGE}:latest ./01-docker-multi-tier-app/frontend"
+            }
+        }
+
+        stage('3. Test & Verify Images') {
+            steps {
+                echo 'Verifying built image availability locally...'
+                sh "docker image inspect ${BACKEND_IMAGE}:${BUILD_TAG} > /dev/null"
+                sh "docker image inspect ${FRONTEND_IMAGE}:${BUILD_TAG} > /dev/null"
+            }
+        }
+
+        stage('4. Push to Docker Hub') {
+            steps {
+                echo 'Authenticating and pushing images to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    
+                    sh "docker push ${BACKEND_IMAGE}:${BUILD_TAG}"
+                    sh "docker push ${BACKEND_IMAGE}:latest"
+                    
+                    sh "docker push ${FRONTEND_IMAGE}:${BUILD_TAG}"
+                    sh "docker push ${FRONTEND_IMAGE}:latest"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished. Cleaning up temporary local images...'
+            sh "docker rmi ${BACKEND_IMAGE}:${BUILD_TAG} ${FRONTEND_IMAGE}:${BUILD_TAG} || true"
+        }
+        success {
+            echo 'CI/CD Pipeline executed successfully!'
+        }
+    }
+}

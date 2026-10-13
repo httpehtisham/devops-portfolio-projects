@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USER = 'httpehtisham'
+        DOCKER_HUB_USER = 'ehtisham00'
         BACKEND_IMAGE   = "${DOCKER_HUB_USER}/devops-backend-api"
         FRONTEND_IMAGE  = "${DOCKER_HUB_USER}/devops-frontend-web"
         BUILD_TAG       = "${BUILD_NUMBER}"
